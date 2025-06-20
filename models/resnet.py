@@ -211,6 +211,32 @@ class ResNet(nn.Module):
         x = self.fc(x)
 
         return x
+    
+    
+    def no_weight_decay(self):
+        """重み減衰から除外するパラメータの名前を返します。
+        バイアス、バッチ正規化のガンマとベータパラメータを除外します。
+        
+        Returns:
+            重み減衰を適用すべきでないパラメータ名のセット
+        """
+        skip = set()
+        
+        # モデル内のすべてのパラメータを調査
+        for name, param in self.named_parameters():
+            # バイアスを除外
+            if 'bias' in name:
+                skip.add(name)
+            # バッチ正規化レイヤーのウェイトとバイアスを除外
+            elif 'bn' in name:
+                skip.add(name)
+        
+        return skip
+    
+    @property
+    def num_classes(self):
+        """クラス数を取得するプロパティ"""
+        return self._num_classes
 
 
 def generate_model(model_depth, **kwargs):
